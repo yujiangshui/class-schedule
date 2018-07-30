@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PTE 英语突击课程表</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+      border: 1px solid #ccc;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px 20px;
+      text-align: center;
+    }
+
+    .body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .body h1 {
+      text-align: center;
+    }
+
+    .toolbar {
+      margin-bottom: 20px;
+    }
+
+    .toolbar-item {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .setting-schedule {
+      font-size: 20px;
+      margin-right: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="body" id="app">
+    <h1>{{title}}</h1>
+    <div class="toolbar">
+      <span class="toolbar-item" @click="settingDialogVisible = true">
+        <i class="el-icon-setting setting-schedule"></i> 设置</span>
+    </div>
+    <table>
+      <thead>
+        <th>时间</th>
+        <th>周一</th>
+        <th>周二</th>
+        <th>周三</th>
+        <th>周四</th>
+        <th>周五</th>
+        <th>周六</th>
+        <th>周日</th>
+      </thead>
+      <tbody>
+        <tr v-for="(time, timeIndex) in times">
+          <th>{{time.time}} {{time.intro}}</th>
+          <td v-for="(day, index) in week">
+            {{formatContent(day, timeIndex)}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <el-dialog title="设置" :visible.sync="settingDialogVisible">
+      <el-form label-width="90px">
+        <el-form-item label="课程表名称">
+          <el-input v-model="tempTitle" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="settingDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateSchedule">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+
+
+</body>
+<script src="./app.js"></script>
+
+</html>
