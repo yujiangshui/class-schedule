@@ -1,7 +1,5 @@
 let data = {
   title: 'PTE 英语突击课程表',
-  tempTitle: 'PTE 英语突击课程表',
-  settingDialogVisible: false,
   times: [
     {
       time: '22:30 - 6:20',
@@ -64,9 +62,8 @@ new Vue({
     formatContent: function(day, index) {
       return (this.days[day][index] || {}).content || '空区间';
     },
-    updateSchedule: function() {
-      this.title = this.tempTitle;
-      this.settingDialogVisible = false;
+    updateSchedule: function({ tempTimes: newTimes, tempTitle: newTitle }) {
+      console.log(newTimes, newTitle);
     },
   },
 });

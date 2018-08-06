@@ -11,6 +11,7 @@
   <!-- 引入 Element.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui/lib/theme-chalk/index.css">
   <script src="https://cdn.jsdelivr.net/npm/element-ui/lib/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/deepcopy@1.0.0/dist/deepcopy.min.js"></script>
 
   <script src="./components.js"></script>
 
@@ -37,33 +38,13 @@
     .body h1 {
       text-align: center;
     }
-
-    .toolbar {
-      margin-bottom: 20px;
-    }
-
-    .toolbar-item {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-
-    .setting-schedule {
-      font-size: 20px;
-      margin-right: 2px;
-    }
   </style>
 </head>
 
 <body>
   <div class="body" id="app">
     <h1>{{title}}</h1>
-    <div class="toolbar">
-      <span class="toolbar-item" @click="settingDialogVisible = true">
-        <i class="el-icon-setting setting-schedule"></i> 设置
-      </span>
-    </div>
-    <time-manager></time-manager>
+    <setting-dialog v-on:confirm-times="updateSchedule" v-bind:title="title" v-bind:times="times"></setting-dialog>
     <table>
       <thead>
         <th>时间</th>
@@ -76,7 +57,7 @@
         <th>周日</th>
       </thead>
       <tbody>
-        <tr v-for="(time, timeIndex) in times">
+        <tr v-for="(time, timeIndex) in times" :key="timeIndex">
           <th>{{time.time}} {{time.intro}}</th>
           <td v-for="(day, index) in week">
             {{formatContent(day, timeIndex)}}
@@ -85,20 +66,7 @@
       </tbody>
     </table>
 
-    <el-dialog title="设置" :visible.sync="settingDialogVisible">
-      <el-form label-width="90px">
-        <el-form-item label="课程表名称">
-          <el-input v-model="tempTitle" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="编辑时间段">
-          <el-input v-model="tempTitle" auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="settingDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateSchedule">确 定</el-button>
-      </div>
-    </el-dialog>
+
   </div>
 
 
