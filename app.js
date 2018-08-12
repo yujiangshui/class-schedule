@@ -63,7 +63,9 @@ function updateDataOfData(thisVue) {
 // 本地存储
 const localDataStr = window.localStorage.getItem('schedule') || '{}';
 function getLocalData() {
-  return JSON.parse(localDataStr);
+  // todo develop mode
+  // return { ...defaultData };
+  return { ...defaultData, ...JSON.parse(localDataStr) };
 }
 function updateLocalData(data) {
   window.localStorage.setItem(
@@ -75,20 +77,40 @@ function updateLocalData(data) {
 new Vue({
   el: '#app',
   data: function() {
-    updateDataOfData({ ...defaultData, ...JSON.parse(localDataStr) });
-    return { ...defaultData, ...JSON.parse(localDataStr) };
+    updateDataOfData(getLocalData());
+    return getLocalData();
   },
   methods: {
     formatContent: function({ day, timeIndex }) {
       return (this.days[day][timeIndex] || {}).content || '空区间';
     },
-    updateSchedule: function({ tempTimes: newTimes, tempTitle: newTitle }) {
+    updateSchedule: function({
+      tempTimes: newTimes,
+      tempTitle: newTitle,
+      deletedTimeIndexs,
+    }) {
+      // 删除时间后，需要将对应行的数据清理
+      if (deletedTimeIndexs.length > 0) {
+        deletedTimeIndexs
+          .sort((a, b) => {
+            return a - b;
+          })
+          // 取反是因为从前往后 splice index 错位了
+          .reverse()
+          .forEach((deletedTimeIndex) => {
+            Object.keys(this.days).forEach((key) => {
+              this.days[key].splice(deletedTimeIndex, 1);
+            });
+          });
+      }
+
       this.title = newTitle;
       this.times = newTimes;
       updateDataOfData(this);
       updateLocalData({
-        title: newTitle,
-        times: newTimes,
+        title: this.title,
+        times: this.times,
+        days: this.days,
       });
     },
     editCell: function({ day, timeIndex }, event) {
