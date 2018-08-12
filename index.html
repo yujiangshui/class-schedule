@@ -60,7 +60,7 @@
         <tr v-for="(time, timeIndex) in times" :key="timeIndex">
           <th>{{time.time}} {{time.intro}}</th>
           <td v-for="(day, index) in week">
-            {{formatContent(day, timeIndex)}}
+            <span :contenteditable="getEditableStatus({day, timeIndex})" @dblclick="editCell({day, timeIndex}, $event)" @focusout="lostEditableStatus({day, timeIndex}, $event)">{{formatContent({day, timeIndex})}}</span>
           </td>
         </tr>
       </tbody>
