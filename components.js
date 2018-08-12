@@ -12,7 +12,7 @@ Vue.component('setting-dialog', {
     return {
       tempTimes: deepcopy(this.times),
       tempTitle: this.title,
-      deletedTimeIndexs: [],
+      deletedTimes: [],
       dialogVisible: false,
       styles: {
         timeManagerAddBtn: {
@@ -53,18 +53,18 @@ Vue.component('setting-dialog', {
     },
     deleteTime: function(index) {
       if (window.confirm('确认删除当前时间段？')) {
-        this.tempTimes.splice(index, 1);
-        this.deletedTimeIndexs.push(index);
+        let deletedTime = this.tempTimes.splice(index, 1);
+        this.deletedTimes.push(deletedTime[0].time);
       }
     },
     confirm: function() {
       this.$emit('confirm-times', {
         tempTitle: deepcopy(this.tempTitle),
         tempTimes: deepcopy(this.tempTimes),
-        deletedTimeIndexs: deepcopy(this.deletedTimeIndexs),
+        deletedTimes: deepcopy(this.deletedTimes),
       });
       this.dialogVisible = false;
-      this.deletedTimeIndexs = [];
+      this.deletedTimes = [];
     },
   },
   template: `

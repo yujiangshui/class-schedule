@@ -2,14 +2,49 @@ let defaultData = {
   title: 'PTE 英语突击课程表',
   times: [
     {
-      time: '22:30 - 6:20',
-      intro: '睡觉',
+      time: '1',
+      intro: '',
+    },
+    {
+      time: '2',
+      intro: '',
+    },
+    {
+      time: '3',
+      intro: '',
+    },
+    {
+      time: '4',
+      intro: '',
+    },
+    {
+      time: '5',
+      intro: '',
+    },
+    {
+      time: '6',
+      intro: '',
     },
   ],
   days: {
     Thu: [
       {
-        content: '睡觉起床',
+        content: '1',
+      },
+      {
+        content: '2',
+      },
+      {
+        content: '3',
+      },
+      {
+        content: '4',
+      },
+      {
+        content: '5',
+      },
+      {
+        content: '6',
       },
     ],
     Sat: [
@@ -87,10 +122,18 @@ new Vue({
     updateSchedule: function({
       tempTimes: newTimes,
       tempTitle: newTitle,
-      deletedTimeIndexs,
+      deletedTimes,
     }) {
       // 删除时间后，需要将对应行的数据清理
-      if (deletedTimeIndexs.length > 0) {
+      if (deletedTimes.length > 0) {
+        let oldTime = deepcopy(this.times);
+        let deletedTimeIndexs = [];
+        let deletedTimesStr = deletedTimes.join(',');
+        oldTime.forEach((time, timeIndex) => {
+          if (deletedTimesStr.indexOf(time.time) > -1) {
+            deletedTimeIndexs.push(timeIndex);
+          }
+        });
         deletedTimeIndexs
           .sort((a, b) => {
             return a - b;
