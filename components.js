@@ -45,7 +45,7 @@ Vue.component('setting-dialog', {
   },
   methods: {
     addTime: function() {
-      this.times.push({
+      this.tempTimes.push({
         time: '',
         intro: '',
       });
@@ -57,9 +57,10 @@ Vue.component('setting-dialog', {
     },
     confirm: function() {
       this.$emit('confirm-times', {
-        tempTitle: this.tempTitle,
-        tempTimes: this.tempTimes,
+        tempTitle: deepcopy(this.tempTitle),
+        tempTimes: deepcopy(this.tempTimes),
       });
+      this.dialogVisible = false;
     },
   },
   template: `

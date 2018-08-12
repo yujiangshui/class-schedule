@@ -1,4 +1,4 @@
-let data = {
+let defaultData = {
   title: 'PTE 英语突击课程表',
   times: [
     {
@@ -53,17 +53,27 @@ let data = {
   week: ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'],
 };
 
+const localDataStr = window.localStorage.getItem('schedule') || '{}';
+
 new Vue({
   el: '#app',
   data: function() {
-    return data;
+    return { ...defaultData, ...JSON.parse(localDataStr) };
   },
   methods: {
     formatContent: function(day, index) {
       return (this.days[day][index] || {}).content || '空区间';
     },
     updateSchedule: function({ tempTimes: newTimes, tempTitle: newTitle }) {
-      console.log(newTimes, newTitle);
+      this.title = newTitle;
+      this.times = newTimes;
+      window.localStorage.setItem(
+        'schedule',
+        JSON.stringify({
+          title: newTitle,
+          times: newTimes,
+        }),
+      );
     },
   },
 });
