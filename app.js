@@ -2,81 +2,98 @@ let defaultData = {
   title: 'PTE 英语突击课程表',
   times: [
     {
-      time: '1',
-      intro: '',
+      time: '22:30 - 6:20',
+      intro: '睡觉',
     },
     {
-      time: '2',
-      intro: '',
+      time: '6:20 - 6:30',
+      intro: '洗漱',
     },
     {
-      time: '3',
-      intro: '',
+      time: '6:30 - 7:10',
+      intro: '早自习',
     },
     {
-      time: '4',
-      intro: '',
+      time: '7:10 - 8:00',
+      intro: '早餐',
     },
     {
-      time: '5',
-      intro: '',
+      time: '8:00 - 8:40',
+      intro: '第一节',
     },
     {
-      time: '6',
-      intro: '',
+      time: '8:50 - 9:30',
+      intro: '第二节',
+    },
+    {
+      time: '9:30 - 10:00',
+      intro: '课间操',
+    },
+    {
+      time: '10:00 - 10:40',
+      intro: '第三节',
+    },
+    {
+      time: '10:50 - 11:30',
+      intro: '第四节',
+    },
+    {
+      time: '11:30 - 13:30',
+      intro: '午饭',
+    },
+    {
+      time: '13:30 - 14:10',
+      intro: '第五节',
+    },
+    {
+      time: '14:20 - 15:00',
+      intro: '第六节',
+    },
+    {
+      time: '15:00 - 15:30',
+      intro: '课间操',
+    },
+    {
+      time: '15:30 - 16:10',
+      intro: '第七节',
+    },
+    {
+      time: '16:20 - 17:00',
+      intro: '第八节',
+    },
+    {
+      time: '17:00 - 17:30',
+      intro: '自由活动',
+    },
+    {
+      time: '17:30 - 19:30',
+      intro: '晚饭',
+    },
+    {
+      time: '19:30 - 20:00',
+      intro: '晚自习1',
+    },
+    {
+      time: '20:10 - 20:50',
+      intro: '晚自习2',
+    },
+    {
+      time: '21:00 - 21:40',
+      intro: '晚自习3',
+    },
+    {
+      time: '21:50 - 22:30',
+      intro: '洗漱睡觉',
     },
   ],
   days: {
-    Thu: [
-      {
-        content: '1',
-      },
-      {
-        content: '2',
-      },
-      {
-        content: '3',
-      },
-      {
-        content: '4',
-      },
-      {
-        content: '5',
-      },
-      {
-        content: '6',
-      },
-    ],
-    Sat: [
-      {
-        content: '睡觉起床',
-      },
-    ],
-    Sun: [
-      {
-        content: '自由安排',
-      },
-    ],
-    Fri: [
-      {
-        content: '睡觉起床',
-      },
-    ],
-    Wen: [
-      {
-        content: '睡觉起床',
-      },
-    ],
-    Tue: [
-      {
-        content: '睡觉起床',
-      },
-    ],
-    Mon: [
-      {
-        content: '睡觉起床',
-      },
-    ],
+    Thu: [],
+    Sat: [],
+    Sun: [],
+    Fri: [],
+    Wen: [],
+    Tue: [],
+    Mon: [],
   },
   week: ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'],
   currentEditableCell: '',
@@ -117,7 +134,7 @@ new Vue({
   },
   methods: {
     formatContent: function({ day, timeIndex }) {
-      return (this.days[day][timeIndex] || {}).content || '空区间';
+      return (this.days[day][timeIndex] || {}).content || '暂无安排';
     },
     updateSchedule: function({
       tempTimes: newTimes,
