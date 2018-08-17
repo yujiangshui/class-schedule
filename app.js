@@ -1,32 +1,32 @@
-let defaultData = {
+const defaultData = {
   title: 'PTE 英语突击课程表',
   times: [
     {
-      time: '22:30 - 6:20',
+      time: '22:30 - 06:20',
       intro: '睡觉',
     },
     {
-      time: '6:20 - 6:30',
+      time: '06:20 - 06:30',
       intro: '洗漱',
     },
     {
-      time: '6:30 - 7:10',
+      time: '06:30 - 07:10',
       intro: '早自习',
     },
     {
-      time: '7:10 - 8:00',
+      time: '07:10 - 08:00',
       intro: '早餐',
     },
     {
-      time: '8:00 - 8:40',
+      time: '08:00 - 08:40',
       intro: '第一节',
     },
     {
-      time: '8:50 - 9:30',
+      time: '08:50 - 09:30',
       intro: '第二节',
     },
     {
-      time: '9:30 - 10:00',
+      time: '09:30 - 10:00',
       intro: '课间操',
     },
     {
@@ -97,6 +97,8 @@ let defaultData = {
   },
   week: ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'],
   currentEditableCell: '',
+  tempTimeRangeArray: [],
+  haveReportedTimeIndexs: {},
 };
 
 // hack Vue 的 data 跟实际业务数据 + 一大堆内置对象偶合在一起了，用这个做个记录
@@ -126,13 +128,75 @@ function updateLocalData(data) {
   );
 }
 
+// 用来拼装时间段换算时间戳
+const todayDate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤓');
+
 new Vue({
   el: '#app',
+  mounted: function() {
+    this.updateTimeRangeArray();
+
+    // 检测时间进行报时操作
+    function checkAndReportTask() {
+      const currentTime = Date.now();
+      const timeRanges = this.tempTimeRangeArray;
+      let needReportTimeIndex = '';
+      timeRanges.some((timeRange, timeIndex) => {
+        if (currentTime < timeRange[1] && !needReportTimeIndex) {
+          needReportTimeIndex = timeIndex;
+          return true;
+        }
+        return false;
+      });
+
+      if (
+        needReportTimeIndex &&
+        !this.haveReportedTimeIndexs[needReportTimeIndex]
+      ) {
+        const weekNo = dateFns.getISODay(Date.now());
+        this.haveReportedTimeIndexs[needReportTimeIndex] = true;
+        const reportInfo =
+          this.days[this.week[weekNo - 1]][needReportTimeIndex].content ||
+          'empty';
+        responsiveVoice.speak(reportInfo, 'Chinese Female');
+      }
+    }
+
+    setInterval(() => {
+      checkAndReportTask.bind(this)();
+    }, 1000);
+  },
   data: function() {
     updateDataOfData(getLocalData());
     return getLocalData();
   },
   methods: {
+    updateTimeRangeArray: function() {
+      const times = this.times;
+      times
+        .filter((timeItem) => {
+          // 不按照时间格式写的先略过吧，后面再加个添加时间的格式校验
+          return timeItem.time.indexOf('-') > -1;
+        })
+        .forEach((timeItem) => {
+          const [currentTimeLeft, currentTimeRight] = timeItem.time.split('-');
+          const currentTimeLeftValue = dateFns.getTime(
+            todayDate.replace('🤓', currentTimeLeft.trim()),
+          );
+          const currentTimeRightValue = dateFns.getTime(
+            todayDate.replace('🤓', currentTimeRight.trim()),
+          );
+          // 兼容 23:00 - 06:00 这种情况
+          if (currentTimeLeftValue > currentTimeRightValue) {
+            this.tempTimeRangeArray.push([0, currentTimeRightValue]);
+          } else {
+            this.tempTimeRangeArray.push([
+              currentTimeLeftValue,
+              currentTimeRightValue,
+            ]);
+          }
+        });
+    },
     formatContent: function({ day, timeIndex }) {
       return (this.days[day][timeIndex] || {}).content || '暂无安排';
     },
@@ -172,6 +236,7 @@ new Vue({
         times: this.times,
         days: this.days,
       });
+      this.updateTimeRangeArray();
     },
     editCell: function({ day, timeIndex }, event) {
       this.currentEditableCell = day + '|' + timeIndex;
