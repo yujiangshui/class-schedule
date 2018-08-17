@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/deepcopy@1.0.0/dist/deepcopy.min.js"></script>
 
   <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+  <script src="http://cdn.date-fns.org/v2.0.0-alpha0/date_fns.min.js"></script>
 
   <script src="./components.js"></script>
 
@@ -62,7 +63,9 @@
         <tr v-for="(time, timeIndex) in times" :key="timeIndex">
           <th>{{time.time}} {{time.intro}}</th>
           <td v-for="(day, index) in week">
-            <span :contenteditable="getEditableStatus({day, timeIndex})" @dblclick="editCell({day, timeIndex}, $event)" @focusout="lostEditableStatus({day, timeIndex}, $event)">{{formatContent({day, timeIndex})}}</span>
+            <span :contenteditable="getEditableStatus({day, timeIndex})" @dblclick="editCell({day, timeIndex}, $event)" @focusout="lostEditableStatus({day, timeIndex}, $event)">{{formatContent({day,
+              timeIndex})}}
+            </span>
           </td>
         </tr>
       </tbody>
