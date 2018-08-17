@@ -82,10 +82,55 @@ Vue.component('setting-dialog', {
         return;
       }
 
+      // 检查时间范围是否重叠
+      // 时间段换算成时间戳区间并存储到数组，下一个时间存储时需要对已有区间进行判断
+      let cachedTimeRanges = [];
+      let hasInvalidTime = null;
+      let invalidTimeItem = null;
+      this.tempTimes.forEach((timeItem) => {
+        const [start, end] = timeItem.time.split('-');
+        const startValue = getTimeValue(start);
+        const endValue = getTimeValue(end);
+        // todo 区分 22:30 - 06:00 后者加一天的逻辑或者前者减一天的逻辑
+
+        hasInvalidTime = cachedTimeRanges.some((timeRange) => {
+          // start end 任何一个点不能在时间区间内
+          if (
+            (startValue > timeRange[0] && startValue < timeRange[1]) ||
+            (endValue > timeRange[0] && endValue < timeRange[1])
+          ) {
+            return true;
+          }
+
+          // 或者 start end 包含当前时间区间，这里有可能 start 比 end 大或者 end 比 start 大（例如：22:30 - 次日 06:00）
+          if (
+            (startValue < timeRange[0] && endValue > timeRange[1]) ||
+            (endValue < timeRange[0] && startValue > timeRange[1])
+          ) {
+            return true;
+          }
+
+          return false;
+        });
+        if (!hasInvalidTime) {
+          cachedTimeRanges.push([startValue, endValue]);
+        } else {
+          invalidTimeItem = timeItem;
+        }
+      });
+      if (hasInvalidTime) {
+        alert(
+          '你填写的时间 ' +
+            invalidTimeItem.time +
+            ' 跟其他时间有交集，请修改。',
+        );
+        return;
+      }
+
       // 时间排序逻辑
       this.tempTimes.sort((a, b) => {
-        let [start1, end1] = a.time.split('-');
-        let [start2, end2] = b.time.split('-');
+        const [start1, end1] = a.time.split('-');
+        const [start2, end2] = b.time.split('-');
 
         const start1Value = getTimeValue(start1);
         const end1Value = getTimeValue(end1);
