@@ -156,8 +156,8 @@ new Vue({
         const weekNo = dateFns.getISODay(Date.now());
         this.haveReportedTimeIndexs[needReportTimeIndex] = true;
         const reportInfo =
-          this.days[this.week[weekNo - 1]][needReportTimeIndex].content ||
-          'empty';
+          (this.days[this.week[weekNo - 1]][needReportTimeIndex] || {})
+            .content || 'empty';
         responsiveVoice.speak(reportInfo, 'Chinese Female');
       }
     }
