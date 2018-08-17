@@ -1,3 +1,13 @@
+// 用来拼装时间段换算时间戳
+const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
+// 02:13 - 02:12
+const timeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?([0-2][0-9]:[0-6][0-9])(\s+)/;
+// 上面正则有 02:68 和 26:36 这样的漏洞
+const badTimeREG = /2[5-9]:|:6[1-9]/;
+const getTimeValue = (timeString) => {
+  return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
+};
+
 Vue.component('setting-dialog', {
   props: {
     title: String,
@@ -58,6 +68,36 @@ Vue.component('setting-dialog', {
       }
     },
     confirm: function() {
+      // times 校验和排序逻辑
+      // 必须按照 xx:xx-xx:xx 的格式写且必须为正常时间
+      const notATime = this.tempTimes.find((timeItem) => {
+        return !timeREG.test(timeItem.time) && badTimeREG.test(timeItem.time);
+      });
+      if (notATime) {
+        alert(
+          '你填写的时间 ' +
+            notATime.time +
+            ' 不符合格式要求或者不是正常的时间，例如：06:50 - 07:10。',
+        );
+        return;
+      }
+
+      // 时间排序逻辑
+      this.tempTimes.sort((a, b) => {
+        let [start1, end1] = a.time.split('-');
+        let [start2, end2] = b.time.split('-');
+
+        const start1Value = getTimeValue(start1);
+        const end1Value = getTimeValue(end1);
+        const start2Value = getTimeValue(start2);
+        const end2Value = getTimeValue(end2);
+        // 避免出现这种顺序 13:30 - 14:10 | 15:00 - 15:30 | 14:20 - 15:00
+        if (end1Value === start2Value) {
+          return start1Value - end2Value;
+        }
+        return end1Value - start2Value;
+      });
+
       this.$emit('confirm-times', {
         tempTitle: deepcopy(this.tempTitle),
         tempTimes: deepcopy(this.tempTimes),

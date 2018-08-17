@@ -129,7 +129,10 @@ function updateLocalData(data) {
 }
 
 // 用来拼装时间段换算时间戳
-const todayDate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤓');
+const todayDate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
+const getTimeStamp = (timeString) => {
+  return dateFns.getTime(todayDate.replace('🤠', timeString.trim()));
+};
 
 new Vue({
   el: '#app',
@@ -157,7 +160,7 @@ new Vue({
         this.haveReportedTimeIndexs[needReportTimeIndex] = true;
         const reportInfo =
           (this.days[this.week[weekNo - 1]][needReportTimeIndex] || {})
-            .content || 'empty';
+            .content || '当前时段暂无安排';
         responsiveVoice.speak(reportInfo, 'Chinese Female');
       }
     }
@@ -179,21 +182,14 @@ new Vue({
           return timeItem.time.indexOf('-') > -1;
         })
         .forEach((timeItem) => {
-          const [currentTimeLeft, currentTimeRight] = timeItem.time.split('-');
-          const currentTimeLeftValue = dateFns.getTime(
-            todayDate.replace('🤓', currentTimeLeft.trim()),
-          );
-          const currentTimeRightValue = dateFns.getTime(
-            todayDate.replace('🤓', currentTimeRight.trim()),
-          );
+          const [timeStart, timeEnd] = timeItem.time.split('-');
+          const timeStartValue = getTimeStamp(timeStart);
+          const timeEndValue = getTimeStamp(timeEnd);
           // 兼容 23:00 - 06:00 这种情况
-          if (currentTimeLeftValue > currentTimeRightValue) {
-            this.tempTimeRangeArray.push([0, currentTimeRightValue]);
+          if (timeStartValue > timeEndValue) {
+            this.tempTimeRangeArray.push([0, timeEndValue]);
           } else {
-            this.tempTimeRangeArray.push([
-              currentTimeLeftValue,
-              currentTimeRightValue,
-            ]);
+            this.tempTimeRangeArray.push([timeStartValue, timeEndValue]);
           }
         });
     },
