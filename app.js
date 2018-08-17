@@ -259,6 +259,17 @@ new Vue({
       this.days[day][timeIndex] = {
         content: newScheduleText,
       };
+      // 如果修改的是周一，默认把每天这个时间段没设置的设置一下
+      if (day === 'Mon') {
+        for (let weekNo = 1; weekNo < 7; weekNo++) {
+          const currentDay = this.week[weekNo];
+          if (!this.days[currentDay][timeIndex]) {
+            this.days[currentDay][timeIndex] = {
+              content: newScheduleText,
+            };
+          }
+        }
+      }
       updateDataOfData(this);
       updateLocalData({
         days: this.days,
