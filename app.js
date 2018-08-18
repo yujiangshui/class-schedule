@@ -98,7 +98,6 @@ const defaultData = {
   week: ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'],
   currentEditableCell: '',
   tempTimeRangeArray: [],
-  haveReportedTimeIndexs: {},
 };
 
 // hack Vue 的 data 跟实际业务数据 + 一大堆内置对象偶合在一起了，用这个做个记录
@@ -141,25 +140,54 @@ new Vue({
     // 检测时间进行报时操作
     function checkAndReportTask() {
       const currentTime = Date.now();
-      let needReportTimeIndex = '';
-      this.tempTimeRangeArray.some((timeRange, timeIndex) => {
-        if (currentTime < timeRange[1] && !needReportTimeIndex) {
-          needReportTimeIndex = timeIndex;
-          return true;
+      let needReportTimeIndexs = [];
+      this.tempTimeRangeArray.forEach((timeRange, timeIndex) => {
+        const [start, end] = timeRange;
+        if (Math.abs(currentTime - start) < 1000) {
+          needReportTimeIndexs.push(`${timeIndex}|start`);
         }
-        return false;
+        if (Math.abs(currentTime - end) < 1000) {
+          needReportTimeIndexs.push(`${timeIndex}|end`);
+        }
       });
 
-      if (
-        needReportTimeIndex &&
-        !this.haveReportedTimeIndexs[needReportTimeIndex]
-      ) {
+      let speakMessages = [];
+      needReportTimeIndexs.forEach((indexItem) => {
+        const [timeIndex, reportType] = indexItem.split('|');
         const weekNo = dateFns.getISODay(Date.now());
-        this.haveReportedTimeIndexs[needReportTimeIndex] = true;
-        const reportInfo =
-          (this.days[this.week[weekNo - 1]][needReportTimeIndex] || {})
-            .content || '当前时段暂无安排';
-        responsiveVoice.speak(reportInfo, 'Chinese Female');
+        const reportInfo = (this.days[this.week[weekNo - 1]][timeIndex] || {})
+          .content;
+        const reportTime = this.times[timeIndex].time;
+        const [startTime, endTime] = reportTime.split('-');
+        if (reportType === 'start') {
+          if (speakMessages.length > 0) {
+            speakMessages.push(
+              `${reportInfo ? reportInfo + '开始了' : '新的任务开始了'}`,
+            );
+          } else {
+            speakMessages.push(
+              `现在是 ${startTime} ${
+                reportInfo ? '开始' + reportInfo : '任务开始'
+              }`,
+            );
+          }
+        } else {
+          if (speakMessages.length > 0) {
+            speakMessages.push(
+              `${reportInfo ? reportInfo + '任务已结束' : '当前任务已结束'}`,
+            );
+          } else {
+            speakMessages.push(
+              `现在是 ${endTime} ${
+                reportInfo ? reportInfo + '任务已结束' : '当前任务已结束'
+              }`,
+            );
+          }
+        }
+      });
+
+      if (speakMessages.length) {
+        responsiveVoice.speak(speakMessages.join(' 同时 '), 'Chinese Female');
       }
     }
 
@@ -175,6 +203,7 @@ new Vue({
     // time range 用于报时扫描，这里维护一个变量
     updateTimeRangeArray: function() {
       const times = this.times;
+      this.tempTimeRangeArray = [];
       times.forEach((timeItem) => {
         const [timeStart, timeEnd] = timeItem.time.split('-');
         const timeStartValue = getTimeStamp(timeStart);
