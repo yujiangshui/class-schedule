@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>PTE 英语突击课程表</title>
+  <title>课程表</title>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
   <!-- 引入 Element.js -->
@@ -41,13 +41,22 @@
     .body h1 {
       text-align: center;
     }
+
+    .header-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
 </head>
 
 <body>
   <div class="body" id="app">
-    <h1>{{title}}</h1>
-    <setting-dialog v-on:confirm-times="updateSchedule" v-bind:title="title" v-bind:times="times"></setting-dialog>
+    <div class="header-wrapper">
+      <h1>{{title}}</h1>
+      <setting-dialog v-on:confirm-times="updateSchedule" v-bind:title="title" v-bind:times="times"></setting-dialog>
+    </div>
     <table>
       <thead>
         <th>时间</th>
@@ -70,11 +79,7 @@
         </tr>
       </tbody>
     </table>
-
-
   </div>
-
-
 </body>
 <script src="./app.js"></script>
 

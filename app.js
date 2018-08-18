@@ -103,7 +103,7 @@ const defaultData = {
 
 // hack Vue 的 data 跟实际业务数据 + 一大堆内置对象偶合在一起了，用这个做个记录
 let dataOfData = {};
-// 枚举要存储的业务字段，方便下面 updateLocalData 做合并，真脏
+// 枚举要存储的业务字段，方便下面 updateLocalData 用 ... 直接做合并，Vue 的 data 跟其他属性挂平级真脏
 function updateDataOfData(thisVue) {
   dataOfData = {
     ...dataOfData,
@@ -114,11 +114,9 @@ function updateDataOfData(thisVue) {
   };
 }
 
-// 本地存储
+// 本地存储相关方法
 const localDataStr = window.localStorage.getItem('schedule') || '{}';
 function getLocalData() {
-  // todo develop mode
-  // return { ...defaultData };
   return { ...defaultData, ...JSON.parse(localDataStr) };
 }
 function updateLocalData(data) {
@@ -129,9 +127,10 @@ function updateLocalData(data) {
 }
 
 // 用来拼装时间段换算时间戳
-const todayDate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
+// hack 由于处于一个全局作用域下，跟 components.js 里面的冲突了，但是全局变量的方式引用，会让人找不到函数出处，所以暂时恶心下，换个名字。正常应该包一个作用域
 const getTimeStamp = (timeString) => {
-  return dateFns.getTime(todayDate.replace('🤠', timeString.trim()));
+  const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
+  return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
 };
 
 new Vue({
@@ -142,9 +141,8 @@ new Vue({
     // 检测时间进行报时操作
     function checkAndReportTask() {
       const currentTime = Date.now();
-      const timeRanges = this.tempTimeRangeArray;
       let needReportTimeIndex = '';
-      timeRanges.some((timeRange, timeIndex) => {
+      this.tempTimeRangeArray.some((timeRange, timeIndex) => {
         if (currentTime < timeRange[1] && !needReportTimeIndex) {
           needReportTimeIndex = timeIndex;
           return true;
@@ -174,24 +172,23 @@ new Vue({
     return getLocalData();
   },
   methods: {
+    // time range 用于报时扫描，这里维护一个变量
     updateTimeRangeArray: function() {
       const times = this.times;
-      times
-        .filter((timeItem) => {
-          // 不按照时间格式写的先略过吧，后面再加个添加时间的格式校验
-          return timeItem.time.indexOf('-') > -1;
-        })
-        .forEach((timeItem) => {
-          const [timeStart, timeEnd] = timeItem.time.split('-');
-          const timeStartValue = getTimeStamp(timeStart);
-          const timeEndValue = getTimeStamp(timeEnd);
-          // 兼容 23:00 - 06:00 这种情况
-          if (timeStartValue > timeEndValue) {
-            this.tempTimeRangeArray.push([0, timeEndValue]);
-          } else {
-            this.tempTimeRangeArray.push([timeStartValue, timeEndValue]);
-          }
-        });
+      times.forEach((timeItem) => {
+        const [timeStart, timeEnd] = timeItem.time.split('-');
+        const timeStartValue = getTimeStamp(timeStart);
+        const timeEndValue = getTimeStamp(timeEnd);
+        // 兼容 23:00 - 06:00 这种情况，后者时间算作第二天吧
+        if (timeStartValue > timeEndValue) {
+          this.tempTimeRangeArray.push([
+            timeStartValue,
+            timeEndValue + 1000 * 60 * 60 * 24,
+          ]);
+        } else {
+          this.tempTimeRangeArray.push([timeStartValue, timeEndValue]);
+        }
+      });
     },
     formatContent: function({ day, timeIndex }) {
       return (this.days[day][timeIndex] || {}).content || '暂无安排';

@@ -1,5 +1,3 @@
-// 用来拼装时间段换算时间戳
-const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
 // 下面正则匹配 02:13 - 02:12 这类的格式
 const timeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?([0-2][0-9]:[0-6][0-9])(\s+)?/;
 // 上面正则有 02:68 和 26:36 这样的漏洞，需要加逻辑
@@ -8,6 +6,8 @@ const badTimeREG = /2[5-9]:|:6[1-9]/;
 const badEqualTimeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?(\2)(\s+)?/;
 
 const getTimeValue = (timeString) => {
+  // 用来拼装时间段换算时间戳
+  const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
   return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
 };
 
@@ -43,7 +43,7 @@ Vue.component('setting-dialog', {
           marginBottom: '10px',
         },
         toolBar: {
-          marginBottom: '20px',
+          marginLeft: '10px',
         },
         toolBarItem: {
           cursor: 'pointer',
@@ -165,10 +165,10 @@ Vue.component('setting-dialog', {
     <div>
       <div :style="styles.toolBar">
         <span :style="styles.toolBarItem" @click="dialogVisible = true">
-          <i class="el-icon-setting" :style="styles.settingIcon" ></i> 设置
+          <i class="el-icon-setting" :style="styles.settingIcon" ></i>
         </span>
       </div>
-      <el-dialog title="时间段设置" :visible.sync="dialogVisible" >
+      <el-dialog title="课程表设置" :visible.sync="dialogVisible" >
         <div class="time-manager-form-wrapper">
           <el-row :style="styles.timeManagerFormItem">
             <el-col :span="3">
