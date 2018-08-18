@@ -2,10 +2,6 @@ const defaultData = {
   title: 'PTE 英语突击课程表',
   times: [
     {
-      time: '22:30 - 06:20',
-      intro: '睡觉',
-    },
-    {
       time: '06:20 - 06:30',
       intro: '洗漱',
     },
@@ -51,7 +47,7 @@ const defaultData = {
     },
     {
       time: '15:00 - 15:30',
-      intro: '课间操',
+      intro: '课间休息',
     },
     {
       time: '15:30 - 16:10',
@@ -84,6 +80,10 @@ const defaultData = {
     {
       time: '21:50 - 22:30',
       intro: '洗漱睡觉',
+    },
+    {
+      time: '22:30 - 06:20',
+      intro: '睡觉',
     },
   ],
   days: {
