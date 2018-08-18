@@ -97,6 +97,7 @@ const defaultData = {
   },
   week: ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'],
   currentEditableCell: '',
+  currentHightlightCell: '',
   tempTimeRangeArray: [],
 };
 
@@ -140,6 +141,7 @@ new Vue({
     // 检测时间进行报时操作
     function checkAndReportTask() {
       const currentTime = Date.now();
+      const weekNo = dateFns.getISODay(Date.now());
       let needReportTimeIndexs = [];
       this.tempTimeRangeArray.forEach((timeRange, timeIndex) => {
         const [start, end] = timeRange;
@@ -149,12 +151,15 @@ new Vue({
         if (Math.abs(currentTime - end) < 1000) {
           needReportTimeIndexs.push(`${timeIndex}|end`);
         }
+
+        if (currentTime > start && currentTime < end) {
+          this.currentHightlightCell = `${this.week[weekNo - 1]}|${timeIndex}`;
+        }
       });
 
       let speakMessages = [];
       needReportTimeIndexs.forEach((indexItem) => {
         const [timeIndex, reportType] = indexItem.split('|');
-        const weekNo = dateFns.getISODay(Date.now());
         const reportInfo = (this.days[this.week[weekNo - 1]][timeIndex] || {})
           .content;
         const reportTime = this.times[timeIndex].time;
@@ -296,6 +301,13 @@ new Vue({
       updateLocalData({
         days: this.days,
       });
+    },
+    getHighlightClass: function({ day, timeIndex }) {
+      if (this.currentHightlightCell === `${day}|${timeIndex}`) {
+        return 'cell-highlight';
+      } else {
+        return '';
+      }
     },
   },
 });

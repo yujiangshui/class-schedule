@@ -152,7 +152,7 @@ Vue.component('setting-dialog', {
           end2Value = end2Value + 1000 * 60 * 60 * 24;
         }
 
-        return end2Value <= start2Value;
+        return start1Value - start2Value;
       });
 
       this.$emit('confirm-times', {

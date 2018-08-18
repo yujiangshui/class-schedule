@@ -48,6 +48,10 @@
       justify-content: center;
       align-items: center;
     }
+
+    .cell-highlight {
+      background: #ccc;
+    }
   </style>
 </head>
 
@@ -69,9 +73,9 @@
         <th>周日</th>
       </thead>
       <tbody>
-        <tr v-for="(time, timeIndex) in times" :key="timeIndex">
+        <tr v-for="(time, timeIndex) in times">
           <th>{{time.time}} {{time.intro}}</th>
-          <td v-for="(day, index) in week">
+          <td v-for="(day, index) in week" :class="getHighlightClass({day, timeIndex})">
             <span :contenteditable="getEditableStatus({day, timeIndex})" @dblclick="editCell({day, timeIndex}, $event)" @focusout="lostEditableStatus({day, timeIndex}, $event)">{{formatContent({day,
               timeIndex})}}
             </span>
