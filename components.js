@@ -1,9 +1,12 @@
 // 用来拼装时间段换算时间戳
 const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
-// 02:13 - 02:12
-const timeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?([0-2][0-9]:[0-6][0-9])(\s+)/;
-// 上面正则有 02:68 和 26:36 这样的漏洞
+// 下面正则匹配 02:13 - 02:12 这类的格式
+const timeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?([0-2][0-9]:[0-6][0-9])(\s+)?/;
+// 上面正则有 02:68 和 26:36 这样的漏洞，需要加逻辑
 const badTimeREG = /2[5-9]:|:6[1-9]/;
+// 而且也不支持起止时间相同
+const badEqualTimeREG = /(\s+)?([0-2][0-9]:[0-6][0-9])(\s)?-(\s)?(\2)(\s+)?/;
+
 const getTimeValue = (timeString) => {
   return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
 };
@@ -70,13 +73,18 @@ Vue.component('setting-dialog', {
     confirm: function() {
       // times 校验和排序逻辑
       // 必须按照 xx:xx-xx:xx 的格式写且必须为正常时间
-      const notATime = this.tempTimes.find((timeItem) => {
-        return !timeREG.test(timeItem.time) && badTimeREG.test(timeItem.time);
+      // 而且前后不能相同
+      const inValidTime = this.tempTimes.find((timeItem) => {
+        return (
+          !timeREG.test(timeItem.time) ||
+          badTimeREG.test(timeItem.time) ||
+          badEqualTimeREG.test(timeItem.time)
+        );
       });
-      if (notATime) {
+      if (inValidTime) {
         alert(
           '你填写的时间 ' +
-            notATime.time +
+            inValidTime.time +
             ' 不符合格式要求或者不是正常的时间，例如：06:50 - 07:10。',
         );
         return;
@@ -89,8 +97,12 @@ Vue.component('setting-dialog', {
       this.tempTimes.forEach((timeItem) => {
         const [start, end] = timeItem.time.split('-');
         const startValue = getTimeValue(start);
-        const endValue = getTimeValue(end);
-        // todo 区分 22:30 - 06:00 后者加一天的逻辑或者前者减一天的逻辑
+        let endValue = getTimeValue(end);
+
+        if (startValue > endValue) {
+          // 22:30 - 06:00 这样的情况需要将后者加一天运算
+          endValue = endValue + 1000 * 60 * 60 * 24;
+        }
 
         let hasInvalidTime = cachedTimeRanges.some((timeRange) => {
           // start end 任何一个点不能在时间区间内
@@ -101,11 +113,8 @@ Vue.component('setting-dialog', {
             return true;
           }
 
-          // 或者 start end 包含当前时间区间，这里有可能 start 比 end 大或者 end 比 start 大（例如：22:30 - 次日 06:00）
-          if (
-            (startValue < timeRange[0] && endValue > timeRange[1]) ||
-            (endValue < timeRange[0] && startValue > timeRange[1])
-          ) {
+          // 或者 start end 包含当前时间区间
+          if (startValue < timeRange[0] && endValue > timeRange[1]) {
             return true;
           }
 
