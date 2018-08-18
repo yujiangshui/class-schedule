@@ -85,15 +85,14 @@ Vue.component('setting-dialog', {
       // 检查时间范围是否重叠
       // 时间段换算成时间戳区间并存储到数组，下一个时间存储时需要对已有区间进行判断
       let cachedTimeRanges = [];
-      let hasInvalidTime = null;
-      let invalidTimeItem = null;
+      let invalidTimeItem = [];
       this.tempTimes.forEach((timeItem) => {
         const [start, end] = timeItem.time.split('-');
         const startValue = getTimeValue(start);
         const endValue = getTimeValue(end);
         // todo 区分 22:30 - 06:00 后者加一天的逻辑或者前者减一天的逻辑
 
-        hasInvalidTime = cachedTimeRanges.some((timeRange) => {
+        let hasInvalidTime = cachedTimeRanges.some((timeRange) => {
           // start end 任何一个点不能在时间区间内
           if (
             (startValue > timeRange[0] && startValue < timeRange[1]) ||
@@ -112,16 +111,17 @@ Vue.component('setting-dialog', {
 
           return false;
         });
+
         if (!hasInvalidTime) {
           cachedTimeRanges.push([startValue, endValue]);
         } else {
-          invalidTimeItem = timeItem;
+          invalidTimeItem.push(timeItem);
         }
       });
-      if (hasInvalidTime) {
+      if (invalidTimeItem.length) {
         alert(
           '你填写的时间 ' +
-            invalidTimeItem.time +
+            invalidTimeItem.map((item) => item.time).join('、') +
             ' 跟其他时间有交集，请修改。',
         );
         return;
