@@ -1,7 +1,7 @@
 // 下面正则匹配 02:13 - 02:12 这类的格式
 const timeREG = /(\s+)?([0-2][0-9]:[0-5][0-9])(\s)?-(\s)?([0-2][0-9]:[0-5][0-9])(\s+)?/;
 // 上面正则有 26:36 这样的漏洞，需要加逻辑
-const badTimeREG = /2[5-9]:/;
+const badTimeREG = /2[4-9]:/;
 // 而且也不支持起止时间相同
 const badEqualTimeREG = /(\s+)?([0-2][0-9]:[0-5][0-9])(\s)?-(\s)?(\2)(\s+)?/;
 
@@ -142,14 +142,17 @@ Vue.component('setting-dialog', {
         const [start2, end2] = b.time.split('-');
 
         const start1Value = getTimeValue(start1);
-        const end1Value = getTimeValue(end1);
-        const start2Value = getTimeValue(start2);
-        const end2Value = getTimeValue(end2);
-        // 避免出现这种顺序 13:30 - 14:10 | 15:00 - 15:30 | 14:20 - 15:00
-        if (end1Value === start2Value) {
-          return start1Value - end2Value;
+        let end1Value = getTimeValue(end1);
+        if (start1Value > end1Value) {
+          end1Value = end1Value + 1000 * 60 * 60 * 24;
         }
-        return end1Value - start2Value;
+        const start2Value = getTimeValue(start2);
+        let end2Value = getTimeValue(end2);
+        if (start2Value > end2Value) {
+          end2Value = end2Value + 1000 * 60 * 60 * 24;
+        }
+
+        return end2Value <= start2Value;
       });
 
       this.$emit('confirm-times', {
