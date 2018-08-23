@@ -276,7 +276,7 @@ new Vue({
         this.currentEditableCell &&
         this.currentEditableCell === day + '|' + timeIndex
       ) {
-        return 'plaintext-only';
+        return 'true';
       }
       return 'false';
     },
