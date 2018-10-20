@@ -1,5 +1,5 @@
 const defaultData = {
-  title: 'PTE 英语突击课程表',
+  title: '课程表',
   times: [
     {
       time: '06:20 - 06:30',
