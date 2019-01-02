@@ -282,7 +282,9 @@ new Vue({
     },
     lostEditableStatus: function({ day, timeIndex }, event) {
       this.currentEditableCell = '';
-      const newScheduleText = event.target.innerHTML;
+      const targetElement = event.target;
+      const targetChildNodes = targetElement.childNodes;
+      const newScheduleText = targetElement.innerText;
       this.days[day][timeIndex] = {
         content: newScheduleText,
       };
@@ -294,6 +296,11 @@ new Vue({
             this.days[currentDay][timeIndex] = {
               content: newScheduleText,
             };
+          }
+          // contenteditable 属性为 plaintext-only 后，原先的标签里会新增标签来包裹新增的内容，即使更新了 content，新增的标签及内容还是会在
+          // 所以这里要特殊处理一下，从 1 开始删除是因为 0 是 text 内容，是我们需要展示的更新后的 content
+          for(var i = 1; i <targetChildNodes.length; i++) {  
+                targetElement.removeChild(targetChildNodes[i]);  
           }
         }
       }
