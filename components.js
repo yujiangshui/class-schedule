@@ -1,12 +1,11 @@
-// 下面正则匹配 02:13 - 02:12 这类的格式
+// The regular expression matches something like 02:13 - 02:12
 const timeREG = /(\s+)?([0-2][0-9]:[0-5][0-9])(\s)?-(\s)?([0-2][0-9]:[0-5][0-9])(\s+)?/;
-// 上面正则有 26:36 这样的漏洞，需要加逻辑
+// The regular expression matches something like 26:36
 const badTimeREG = /2[4-9]:/;
-// 而且也不支持起止时间相同
+// Meanwhile, don't support 'start time' equal 'end time' cases
 const badEqualTimeREG = /(\s+)?([0-2][0-9]:[0-5][0-9])(\s)?-(\s)?(\2)(\s+)?/;
 
 const getTimeValue = (timeString) => {
-  // 用来拼装时间段换算时间戳
   const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
   return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
 };
@@ -65,15 +64,15 @@ Vue.component('setting-dialog', {
       });
     },
     deleteTime: function(index) {
-      if (window.confirm('确认删除当前时间段？')) {
+      if (window.confirm('Are you sure to delete this time row?')) {
         let deletedTime = this.tempTimes.splice(index, 1);
         this.deletedTimes.push(deletedTime[0].time);
       }
     },
     confirm: function() {
-      // times 校验和排序逻辑
-      // 必须按照 xx:xx-xx:xx 的格式写且必须为正常时间
-      // 而且前后不能相同
+      // time check and sort logics
+      // must type something like xx:xx-xx:xx and must be a valid time
+      // and the left time cannot equal the right time
       const inValidTime = this.tempTimes.find((timeItem) => {
         return (
           !timeREG.test(timeItem.time) ||
@@ -83,15 +82,15 @@ Vue.component('setting-dialog', {
       });
       if (inValidTime) {
         alert(
-          '你填写的时间 ' +
+          'The time you typed ' +
             inValidTime.time +
-            ' 不符合格式要求或者不是正常的时间，例如：06:50 - 07:10。',
+            ' is not an expected time. This app expects you type something like 06:50 - 07:10.',
         );
         return;
       }
 
-      // 检查时间范围是否重叠
-      // 时间段换算成时间戳区间并存储到数组，下一个时间存储时需要对已有区间进行判断
+      // time periods overlap check logic
+      // Convert time to timestamp and put them into the array, when put new time, check if this timestamp already included in the previous array items.
       let cachedTimeRanges = [];
       let invalidTimeItem = [];
       this.tempTimes.forEach((timeItem) => {
@@ -100,12 +99,12 @@ Vue.component('setting-dialog', {
         let endValue = getTimeValue(end);
 
         if (startValue > endValue) {
-          // 22:30 - 06:00 这样的情况需要将后者加一天运算
+          // 22:30 - 06:00 situation need add more day
           endValue = endValue + 1000 * 60 * 60 * 24;
         }
 
         let hasInvalidTime = cachedTimeRanges.some((timeRange) => {
-          // start end 任何一个点不能在时间区间内
+          // if the start and end timestamp not included in any array item, then return valid
           if (
             (startValue > timeRange[0] && startValue < timeRange[1]) ||
             (endValue > timeRange[0] && endValue < timeRange[1])
@@ -113,7 +112,6 @@ Vue.component('setting-dialog', {
             return true;
           }
 
-          // 或者 start end 包含当前时间区间
           if (startValue < timeRange[0] && endValue > timeRange[1]) {
             return true;
           }
@@ -129,14 +127,14 @@ Vue.component('setting-dialog', {
       });
       if (invalidTimeItem.length) {
         alert(
-          '你填写的时间 ' +
-            invalidTimeItem.map((item) => item.time).join('、') +
-            ' 跟其他时间有交集，请修改。',
+          'The time you typed ' +
+            invalidTimeItem.map((item) => item.time).join(',') +
+            ' overlap with other time, please edit.',
         );
         return;
       }
 
-      // 时间排序逻辑
+      // time sort logic
       this.tempTimes.sort((a, b) => {
         const [start1, end1] = a.time.split('-');
         const [start2, end2] = b.time.split('-');
@@ -171,11 +169,11 @@ Vue.component('setting-dialog', {
           <i class="el-icon-setting" :style="styles.settingIcon" ></i>
         </span>
       </div>
-      <el-dialog title="课程表设置" :visible.sync="dialogVisible" >
+      <el-dialog title="Setting" :visible.sync="dialogVisible" >
         <div class="time-manager-form-wrapper">
           <el-row :style="styles.timeManagerFormItem">
             <el-col :span="3">
-              <span>标题：</span>
+              <span>Title:</span>
             </el-col>
             <el-col :span="21">
               <el-input v-model="tempTitle" auto-complete="off"></el-input>
@@ -186,28 +184,28 @@ Vue.component('setting-dialog', {
             v-for="(time, index) in tempTimes"
           >
             <el-col :span="3">
-              <span>时间：</span>
+              <span>Time:</span>
             </el-col>
             <el-col :span="9">
               <el-input
-                placeholder="例如：12:00 - 13:00" 
+                placeholder="like 12:00 - 13:00" 
                 v-bind:value="time.time"
                 v-model="time.time"
               ></el-input>
             </el-col>
             <el-col :span="3" :offset="1">
-              <span>说明：</span>
+              <span>Introduction:</span>
             </el-col>
             <el-col :span="6">
               <el-input
-                placeholder="比如：午饭"
+                placeholder="like lunch"
                 v-bind:value="time.intro"
                 v-model="time.intro"
               ></el-input>
             </el-col>
             <el-col :span="1" :offset="1">
               <i
-                title="删除当前时间" 
+                title="delete this" 
                 class="el-icon-close" 
                 v-bind:style="styles.deleteBtn"
                 @click="deleteTime(index)"
@@ -222,8 +220,8 @@ Vue.component('setting-dialog', {
         >+</el-button>
 
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="confirm">确 定</el-button>
+          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="confirm">Confirm</el-button>
         </div>
       </el-dialog>
     </div>

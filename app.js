@@ -1,89 +1,89 @@
 const defaultData = {
-  title: '课程表',
+  title: 'My Class Schedule',
   times: [
     {
       time: '06:20 - 06:30',
-      intro: '洗漱',
+      intro: 'Morning Washing',
     },
     {
       time: '06:30 - 07:10',
-      intro: '早自习',
+      intro: 'Morning Studies',
     },
     {
       time: '07:10 - 08:00',
-      intro: '早餐',
+      intro: 'Breakfast',
     },
     {
       time: '08:00 - 08:40',
-      intro: '第一节',
+      intro: 'Class',
     },
     {
       time: '08:50 - 09:30',
-      intro: '第二节',
+      intro: 'Class',
     },
     {
       time: '09:30 - 10:00',
-      intro: '课间操',
+      intro: 'Break',
     },
     {
       time: '10:00 - 10:40',
-      intro: '第三节',
+      intro: 'Class',
     },
     {
       time: '10:50 - 11:30',
-      intro: '第四节',
+      intro: 'Class',
     },
     {
       time: '11:30 - 13:30',
-      intro: '午饭',
+      intro: 'Lunch',
     },
     {
       time: '13:30 - 14:10',
-      intro: '第五节',
+      intro: 'Class',
     },
     {
       time: '14:20 - 15:00',
-      intro: '第六节',
+      intro: 'Class',
     },
     {
       time: '15:00 - 15:30',
-      intro: '课间休息',
+      intro: 'Break',
     },
     {
       time: '15:30 - 16:10',
-      intro: '第七节',
+      intro: 'Class',
     },
     {
       time: '16:20 - 17:00',
-      intro: '第八节',
+      intro: 'Class',
     },
     {
       time: '17:00 - 17:30',
-      intro: '自由活动',
+      intro: 'Exercise',
     },
     {
       time: '17:30 - 19:30',
-      intro: '晚饭',
+      intro: 'Dinner',
     },
     {
       time: '19:30 - 20:00',
-      intro: '晚自习1',
+      intro: 'Evening Studies',
     },
     {
       time: '20:10 - 20:50',
-      intro: '晚自习2',
+      intro: 'Evening Studies',
     },
     {
       time: '21:00 - 21:40',
-      intro: '晚自习3',
+      intro: 'Evening Studies',
     },
     {
       time: '21:50 - 22:30',
-      intro: '洗漱睡觉',
+      intro: 'Prepare for Sleep',
     },
     {
       time: '22:30 - 06:20',
-      intro: '睡觉',
+      intro: 'Sleep',
     },
   ],
   days: {
@@ -101,9 +101,9 @@ const defaultData = {
   tempTimeRangeArray: [],
 };
 
-// hack Vue 的 data 跟实际业务数据 + 一大堆内置对象偶合在一起了，用这个做个记录
+// hack. The data in Vue mixed with a bunch of internal objects, so use this to record external objects.
 let dataOfData = {};
-// 枚举要存储的业务字段，方便下面 updateLocalData 用 ... 直接做合并，Vue 的 data 跟其他属性挂平级真脏
+// List the business keys which used by updateLocalData function.
 function updateDataOfData(thisVue) {
   dataOfData = {
     ...dataOfData,
@@ -114,7 +114,7 @@ function updateDataOfData(thisVue) {
   };
 }
 
-// 本地存储相关方法
+// record data by localStorage
 const localDataStr = window.localStorage.getItem('schedule') || '{}';
 function getLocalData() {
   return { ...defaultData, ...JSON.parse(localDataStr) };
@@ -126,8 +126,7 @@ function updateLocalData(data) {
   );
 }
 
-// 用来拼装时间段换算时间戳
-// hack 由于处于一个全局作用域下，跟 components.js 里面的冲突了，但是全局变量的方式引用，会让人找不到函数出处，所以暂时恶心下，换个名字。正常应该包一个作用域
+// hack. Because I don't create a Scope for this app.js, there has been a conflict between app.js and components.js if I use the same name getTimeStamp, so I changed the name. The better way is to use Vue cli to generate projects and coding, but this project is experimental.
 const getTimeStamp = (timeString) => {
   const dateTemplate = dateFns.format(Date.now(), 'YYYY-MM-DD 🤠');
   return dateFns.getTime(dateTemplate.replace('🤠', timeString.trim()));
@@ -138,7 +137,7 @@ new Vue({
   mounted: function() {
     this.updateTimeRangeArray();
 
-    // 检测时间进行报时操作
+    // check the time and report
     function checkAndReportTask() {
       const currentTime = Date.now();
       const weekNo = dateFns.getISODay(Date.now());
@@ -167,24 +166,36 @@ new Vue({
         if (reportType === 'start') {
           if (speakMessages.length > 0) {
             speakMessages.push(
-              `${reportInfo ? reportInfo + '开始了' : '新的任务开始了'}`,
+              `${
+                reportInfo
+                  ? reportInfo + ' has started'
+                  : 'A new mission has started'
+              }`,
             );
           } else {
             speakMessages.push(
-              `现在是 ${startTime} ${
-                reportInfo ? '开始' + reportInfo : '任务开始'
+              `Now is ${startTime} ${
+                reportInfo
+                  ? reportInfo + ' has started'
+                  : 'A new mission has started'
               }`,
             );
           }
         } else {
           if (speakMessages.length > 0) {
             speakMessages.push(
-              `${reportInfo ? reportInfo + '任务已结束' : '当前任务已结束'}`,
+              `${
+                reportInfo
+                  ? reportInfo + ' has finished'
+                  : 'The current mission has finished.'
+              }`,
             );
           } else {
             speakMessages.push(
-              `现在是 ${endTime} ${
-                reportInfo ? reportInfo + '任务已结束' : '当前任务已结束'
+              `Now is ${endTime} ${
+                reportInfo
+                  ? reportInfo + ' has finished'
+                  : 'The current mission has finished.'
               }`,
             );
           }
@@ -192,7 +203,10 @@ new Vue({
       });
 
       if (speakMessages.length) {
-        responsiveVoice.speak(speakMessages.join(' 同时 '), 'Chinese Female');
+        responsiveVoice.speak(
+          speakMessages.join(' Meanwhile '),
+          'US English Female',
+        );
       }
     }
 
@@ -205,7 +219,6 @@ new Vue({
     return getLocalData();
   },
   methods: {
-    // time range 用于报时扫描，这里维护一个变量
     updateTimeRangeArray: function() {
       const times = this.times;
       this.tempTimeRangeArray = [];
@@ -213,7 +226,7 @@ new Vue({
         const [timeStart, timeEnd] = timeItem.time.split('-');
         const timeStartValue = getTimeStamp(timeStart);
         const timeEndValue = getTimeStamp(timeEnd);
-        // 兼容 23:00 - 06:00 这种情况，后者时间算作第二天吧
+        // For 23:00 - 06:00 situation. Treat 06:00 as the next day.
         if (timeStartValue > timeEndValue) {
           this.tempTimeRangeArray.push([
             timeStartValue,
@@ -225,14 +238,14 @@ new Vue({
       });
     },
     formatContent: function({ day, timeIndex }) {
-      return (this.days[day][timeIndex] || {}).content || '暂无安排';
+      return (this.days[day][timeIndex] || {}).content || 'None';
     },
     updateSchedule: function({
       tempTimes: newTimes,
       tempTitle: newTitle,
       deletedTimes,
     }) {
-      // 删除时间后，需要将对应行的数据清理
+      // Need to delete the related data when deleting the time.
       if (deletedTimes.length > 0) {
         let oldTime = deepcopy(this.times);
         let deletedTimeIndexs = [];
@@ -246,7 +259,7 @@ new Vue({
           .sort((a, b) => {
             return a - b;
           })
-          // 取反是因为从前往后 splice index 错位了
+          // use reverse because use splice will changing the index
           .reverse()
           .forEach((deletedTimeIndex) => {
             Object.keys(this.days).forEach((key) => {
@@ -288,7 +301,7 @@ new Vue({
       this.days[day][timeIndex] = {
         content: newScheduleText,
       };
-      // 如果修改的是周一，默认把每天这个时间段没设置的设置一下
+      // if a user modifies the cell of Monday and if other cells in one row are 'None', then change together.
       if (day === 'Mon') {
         for (let weekNo = 1; weekNo < 7; weekNo++) {
           const currentDay = this.week[weekNo];
@@ -297,10 +310,8 @@ new Vue({
               content: newScheduleText,
             };
           }
-          // contenteditable 属性为 plaintext-only 后，原先的标签里会新增标签来包裹新增的内容，即使更新了 content，新增的标签及内容还是会在
-          // 所以这里要特殊处理一下，从 1 开始删除是因为 0 是 text 内容，是我们需要展示的更新后的 content
-          for(var i = 1; i <targetChildNodes.length; i++) {  
-                targetElement.removeChild(targetChildNodes[i]);  
+          for (let i = 1; i < targetChildNodes.length; i++) {
+            targetElement.removeChild(targetChildNodes[i]);
           }
         }
       }
