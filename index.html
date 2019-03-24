@@ -1,90 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Class Schedule</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>课程表</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- Element.js -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/element-ui/lib/theme-chalk/index.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/deepcopy@1.0.0/dist/deepcopy.min.js"></script>
 
-  <!-- 引入 Element.js -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui/lib/theme-chalk/index.css">
-  <script src="https://cdn.jsdelivr.net/npm/element-ui/lib/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/deepcopy@1.0.0/dist/deepcopy.min.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+    <script src="http://cdn.date-fns.org/v2.0.0-alpha0/date_fns.min.js"></script>
 
-  <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
-  <script src="http://cdn.date-fns.org/v2.0.0-alpha0/date_fns.min.js"></script>
+    <script src="./components.js"></script>
 
-  <script src="./components.js"></script>
+    <style>
+      table {
+        border-collapse: collapse;
+        border: 1px solid #33cccc;
+      }
 
-  <style>
-    table {
-      border-collapse: collapse;
-      border: 1px solid #ccc;
-    }
+      th,
+      td {
+        border: 1px solid #33cccc;
+        padding: 10px 20px;
+        text-align: center;
+        min-width: 100px;
+      }
 
-    th,
-    td {
-      border: 1px solid #ccc;
-      padding: 10px 20px;
-      text-align: center;
-    }
+      .body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
 
-    .body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
+      .body h1 {
+        text-align: center;
+      }
 
-    .body h1 {
-      text-align: center;
-    }
+      .header-wrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
 
-    .header-wrapper {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-    }
+      .cell-highlight {
+        background: #33cccc;
+        color: #fff;
+      }
+    </style>
+  </head>
 
-    .cell-highlight {
-      background: #ccc;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="body" id="app">
-    <div class="header-wrapper">
-      <h1>{{title}}</h1>
-      <setting-dialog v-on:confirm-times="updateSchedule" v-bind:title="title" v-bind:times="times"></setting-dialog>
-    </div>
-    <table>
-      <thead>
-        <th>时间</th>
-        <th>周一</th>
-        <th>周二</th>
-        <th>周三</th>
-        <th>周四</th>
-        <th>周五</th>
-        <th>周六</th>
-        <th>周日</th>
-      </thead>
-      <tbody>
-        <tr v-for="(time, timeIndex) in times">
-          <th>{{time.time}} {{time.intro}}</th>
-          <td v-for="(day, index) in week" :class="getHighlightClass({day, timeIndex})">
-            <span :contenteditable="getEditableStatus({day, timeIndex})" @dblclick="editCell({day, timeIndex}, $event)" @focusout="lostEditableStatus({day, timeIndex}, $event)">{{formatContent({day,
+  <body>
+    <div class="body" id="app">
+      <div class="header-wrapper">
+        <h1>{{ title }}</h1>
+        <setting-dialog
+          v-on:confirm-times="updateSchedule"
+          v-bind:title="title"
+          v-bind:times="times"
+        ></setting-dialog>
+      </div>
+      <table>
+        <thead>
+          <th>Time</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </thead>
+        <tbody>
+          <tr v-for="(time, timeIndex) in times">
+            <th>{{ time.time }} {{ time.intro }}</th>
+            <td
+              v-for="(day, index) in week"
+              :class="getHighlightClass({day, timeIndex})"
+            >
+              <div
+                :contenteditable="getEditableStatus({day, timeIndex})"
+                @dblclick="editCell({day, timeIndex}, $event)"
+                @focusout="lostEditableStatus({day, timeIndex}, $event)"
+              >
+                {{formatContent({day,
               timeIndex})}}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</body>
-<script src="./app.js"></script>
-
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+  <script src="./app.js"></script>
 </html>
