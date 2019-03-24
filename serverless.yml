@@ -1,0 +1,25 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+# Serverless.yml is the configuration the CLI
+# uses to deploy your code to your provider of choice
+
+# The `service` block is the name of the service
+service: serverless-class-schedule
+
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: prod
+  region: us-west-2
+
+# The `functions` block defines what code to deploy
+functions:
+  render:
+    handler: handler.render
+    events:
+      - http:
+          path: class-schedule
+          method: get
+          cors: true
