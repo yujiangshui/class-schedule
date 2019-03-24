@@ -194,7 +194,7 @@ Vue.component('setting-dialog', {
               ></el-input>
             </el-col>
             <el-col :span="3" :offset="1">
-              <span>Introduction:</span>
+              <span>Description:</span>
             </el-col>
             <el-col :span="6">
               <el-input
