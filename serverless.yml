@@ -16,10 +16,12 @@ provider:
 
 # The `functions` block defines what code to deploy
 functions:
-  render:
-    handler: handler.render
+  static:
+    handler: handler.static
     events:
       - http:
-          path: class-schedule
+          path: /{fileName+}
           method: get
-          cors: true
+      - http:
+          path: /
+          method: get
